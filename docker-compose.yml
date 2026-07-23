@@ -1,0 +1,7 @@
+services:
+  kloudra-site:
+    build: .
+    container_name: kloudra-site
+    ports:
+      - "8080:80"
+    restart: unless-stopped
