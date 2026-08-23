@@ -3,16 +3,16 @@
    ========================================================= */
 
 :root{
-  --ink:#0B0E14;
-  --panel:#121826;
-  --panel-2:#171E2C;
-  --gold:#E8A33D;
-  --gold-dim:#C98A2E;
-  --cyan:#63D9C6;
-  --paper:#ECE9E0;
-  --fog:#8891A3;
-  --line: rgba(236,233,224,0.09);
-  --line-strong: rgba(236,233,224,0.16);
+  --ink:#050B1A;
+  --panel:#0C1630;
+  --panel-2:#101C3D;
+  --gold:#3B82F6;
+  --gold-dim:#2563EB;
+  --cyan:#60A5FA;
+  --paper:#ECEFF7;
+  --fog:#8695B7;
+  --line: rgba(236,239,247,0.09);
+  --line-strong: rgba(236,239,247,0.17);
   --radius: 14px;
   --maxw: 1180px;
 }
@@ -64,7 +64,33 @@ header{
 }
 nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:76px; }
 .brand{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:19px; }
-.brand-mark{ width:30px; height:30px; flex:none; }
+.brand-mark{
+  width:24px; height:24px; flex:none; object-fit:contain;
+  animation:brand-pulse 4s ease-in-out infinite;
+}
+@keyframes brand-pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.1); } }
+@media (prefers-reduced-motion: reduce){ .brand-mark{ animation:none !important; } }
+
+/* ---------- hero logo (replaces old sun emblem) ---------- */
+.hero-logo-wrap{ position:relative; display:flex; align-items:center; justify-content:center; aspect-ratio:1/1; }
+.hero-logo-glow{
+  position:absolute; width:60%; height:60%; border-radius:50%;
+  background:radial-gradient(circle, rgba(59,130,246,0.35), rgba(59,130,246,0) 70%);
+  filter:blur(10px);
+  animation:glow-pulse 5s ease-in-out infinite;
+}
+.hero-logo-ring{
+  position:absolute; inset:12%; border:1px solid var(--line-strong); border-radius:50%;
+}
+.hero-logo-ring.r2{ inset:22%; border-color:var(--line); }
+.hero-logo-wrap img{
+  position:relative; width:38%; z-index:2;
+  animation:logo-float 6s ease-in-out infinite;
+  filter:drop-shadow(0 20px 40px rgba(37,99,235,0.35));
+}
+@keyframes logo-float{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-12px) rotate(3deg); } }
+@keyframes glow-pulse{ 0%,100%{ opacity:0.7; } 50%{ opacity:1; } }
+@media (prefers-reduced-motion: reduce){ .hero-logo-wrap img, .hero-logo-glow{ animation:none !important; } }
 .brand small{ display:block; font-family:'JetBrains Mono', monospace; font-weight:400; font-size:10px; color:var(--fog); letter-spacing:0.06em; margin-top:1px; }
 
 .nav-links{ display:flex; align-items:center; gap:32px; font-size:14.5px; color:var(--fog); }
@@ -143,14 +169,7 @@ nav.wrap{ display:flex; align-items:center; justify-content:space-between; heigh
 .hero .locale .dot{ color:var(--cyan); }
 .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
 
-.sun-wrap{ position:relative; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; }
-.sun-wrap svg{ width:100%; height:100%; max-width:420px; }
-.ray{ transform-origin:210px 210px; animation:spin 42s linear infinite; }
-.ray.rev{ animation-direction:reverse; animation-duration:60s; }
-.pulse-node{ animation:pulse 3.2s ease-in-out infinite; }
-@keyframes spin{ to{ transform:rotate(360deg); } }
-@keyframes pulse{ 0%,100%{ opacity:.45; r:3.2; } 50%{ opacity:1; r:4.4; } }
-@media (prefers-reduced-motion: reduce){ .ray, .pulse-node{ animation:none !important; } }
+
 
 /* ---------- section shell ---------- */
 section{ padding:104px 0; border-bottom:1px solid var(--line); }
@@ -306,7 +325,7 @@ footer{ padding:48px 0 32px; }
 /* ---------- responsive ---------- */
 @media (max-width: 980px){
   .hero-inner{ grid-template-columns:1fr; }
-  .sun-wrap{ order:-1; max-width:260px; margin:0 auto; }
+  .hero-logo-wrap{ order:-1; max-width:260px; margin:0 auto; }
   .about-layout{ grid-template-columns:1fr; gap:32px; }
   .svc-grid{ grid-template-columns:1fr 1fr; }
   .why-grid{ grid-template-columns:1fr; }
