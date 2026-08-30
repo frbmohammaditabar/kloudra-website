@@ -4,7 +4,7 @@ FROM nginx:1.27-alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # copy site files
-COPY index.html services.html about.html projects.html contact.html styles.css script.js /usr/share/nginx/html/
+COPY index.html services.html about.html projects.html contact.html careers.html styles.css script.js /usr/share/nginx/html/
 COPY assets/ /usr/share/nginx/html/assets/
 
 # make sure the nginx worker process (runs as non-root) can read everything
