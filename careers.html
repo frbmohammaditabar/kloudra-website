@@ -49,7 +49,7 @@
   <div class="wrap contact-inner">
     <div class="reveal">
       <h2 style="font-size:clamp(24px,3vw,30px); margin-bottom:18px;">Apply</h2>
-      <form class="contact-form" id="careersForm" action="https://formspree.io/f/xppzwnjG" method="POST" enctype="multipart/form-data">
+      <form class="contact-form" id="careersForm" action="https://formspree.io/f/xppzwnjg" method="POST" enctype="multipart/form-data">
         <div class="form-cols">
           <div class="form-row">
             <label for="cf-first">First Name</label>
@@ -90,6 +90,7 @@
           <textarea id="cf-note" name="message" rows="4" placeholder="Anything you'd like us to know."></textarea>
         </div>
         <input type="hidden" name="_subject" value="New job application — Kloudra Solutions">
+        <input type="hidden" name="_next" value="https://kloudra.net/careers.html?submitted=true">
         <button type="submit" class="btn btn-primary">Submit Application
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h12M12 5l5 5-5 5"/></svg>
         </button>
@@ -156,26 +157,16 @@
 
 <script src="script.js"></script>
 <script>
-  document.getElementById('careersForm').addEventListener('submit', async function(e){
-    e.preventDefault();
-    const form = e.target;
+  // Formspree submits this form as a normal HTML POST (most reliable with file uploads).
+  // On success it redirects back here with ?submitted=true, so we show a success banner.
+  if (new URLSearchParams(window.location.search).get('submitted') === 'true') {
     const status = document.getElementById('formStatus');
-    const data = new FormData(form);
-    try {
-      const res = await fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
-      if (res.ok) {
-        status.textContent = "Thanks — your application was submitted. We'll be in touch by email.";
-        status.className = 'form-status show success';
-        form.reset();
-      } else {
-        status.textContent = "Something went wrong submitting your application. Please try again or email us directly.";
-        status.className = 'form-status show error';
-      }
-    } catch (err) {
-      status.textContent = "Something went wrong submitting your application. Please try again or email us directly.";
-      status.className = 'form-status show error';
+    if (status) {
+      status.textContent = "Thanks — your application was submitted. We'll be in touch by email.";
+      status.className = 'form-status show success';
+      status.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  });
+  }
 </script>
 </body>
 </html>
