@@ -1,0 +1,3 @@
+kloudra.net, www.kloudra.net {
+    reverse_proxy kloudra-site:80
+}
