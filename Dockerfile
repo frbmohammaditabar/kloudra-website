@@ -1,13 +1,20 @@
-FROM python:3.12-slim
+FROM nginx:1.27-alpine
 
-WORKDIR /app
+# remove default nginx site
+RUN rm -rf /usr/share/nginx/html/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# copy site files
+COPY index.html services.html about.html projects.html contact.html careers.html styles.css script.js /usr/share/nginx/html/
+COPY assets/ /usr/share/nginx/html/assets/
+COPY careers-api/ /usr/share/nginx/html/careers-api/
 
-COPY app.py .
-RUN mkdir -p /app/uploads
+# make sure the nginx worker process (runs as non-root) can read everything
+RUN chmod -R 755 /usr/share/nginx/html
 
-EXPOSE 5000
+# custom nginx config (clean URLs, gzip, caching)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "--workers", "2", "--timeout", "60", "app:app"]
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -q --spider http://localhost/ || exit 1
+

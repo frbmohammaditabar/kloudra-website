@@ -1,8 +1,10 @@
 import os
+import ssl
+import smtplib
 import logging
 from datetime import datetime, timezone
+from email.message import EmailMessage
 
-import requests
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 
@@ -16,9 +18,11 @@ ALLOWED_EXT = {".pdf", ".doc", ".docx"}
 MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 app.config["MAX_CONTENT_LENGTH"] = MAX_SIZE + (1 * 1024 * 1024)  # small buffer for other fields
 
-RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", "onboarding@resend.dev")
-TO_EMAIL = os.environ.get("TO_EMAIL")
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "465"))
+SMTP_USER = os.environ.get("SMTP_USER")
+SMTP_PASS = os.environ.get("SMTP_PASS")
+TO_EMAIL = os.environ.get("TO_EMAIL", SMTP_USER)
 
 
 @app.route("/api/health")
@@ -57,40 +61,27 @@ def apply():
         with open(os.path.join(UPLOAD_DIR, stored_name), "wb") as f:
             f.write(resume_bytes)
 
-        if RESEND_API_KEY and TO_EMAIL:
-            import base64
-            body_text = (
+        if SMTP_USER and SMTP_PASS:
+            msg = EmailMessage()
+            msg["Subject"] = f"New job application — {first_name} {last_name}"
+            msg["From"] = SMTP_USER
+            msg["To"] = TO_EMAIL
+            msg.set_content(
                 f"Name: {first_name} {last_name}\n"
                 f"Email: {email}\n"
                 f"Phone: {phone}\n"
                 f"Role: {role}\n\n"
                 f"Message:\n{message or '(none)'}\n"
             )
-            payload = {
-                "from": f"Kloudra Careers <{FROM_EMAIL}>",
-                "to": [TO_EMAIL],
-                "subject": f"New job application — {first_name} {last_name}",
-                "text": body_text,
-                "attachments": [
-                    {
-                        "filename": safe_name,
-                        "content": base64.b64encode(resume_bytes).decode("utf-8"),
-                    }
-                ],
-            }
-            resp = requests.post(
-                "https://api.resend.com/emails",
-                headers={
-                    "Authorization": f"Bearer {RESEND_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json=payload,
-                timeout=20,
-            )
-            if resp.status_code >= 300:
-                app.logger.error("Resend API error: %s %s", resp.status_code, resp.text)
+            subtype = "pdf" if ext == ".pdf" else "vnd.openxmlformats-officedocument.wordprocessingml.document"
+            msg.add_attachment(resume_bytes, maintype="application", subtype=subtype, filename=safe_name)
+
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context) as server:
+                server.login(SMTP_USER, SMTP_PASS)
+                server.send_message(msg)
         else:
-            app.logger.warning("RESEND_API_KEY/TO_EMAIL not set — email not sent, file saved only.")
+            app.logger.warning("SMTP_USER/SMTP_PASS not set — email not sent, file saved only.")
 
         return jsonify({"ok": True})
 
