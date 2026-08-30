@@ -6,6 +6,17 @@ services:
     expose:
       - "80"
 
+  careers-api:
+    build: ./careers-api
+    container_name: kloudra-careers-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - careers_uploads:/app/uploads
+    expose:
+      - "5000"
+
   caddy:
     image: caddy:2-alpine
     container_name: kloudra-caddy
@@ -19,7 +30,9 @@ services:
       - caddy_config:/config
     depends_on:
       - kloudra-site
+      - careers-api
 
 volumes:
   caddy_data:
   caddy_config:
+  careers_uploads:

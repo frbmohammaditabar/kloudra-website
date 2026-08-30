@@ -1,3 +1,8 @@
 kloudra.net, www.kloudra.net {
-    reverse_proxy kloudra-site:80
+    handle /api/* {
+        reverse_proxy careers-api:5000
+    }
+    handle {
+        reverse_proxy kloudra-site:80
+    }
 }
